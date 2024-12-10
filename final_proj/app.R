@@ -136,7 +136,7 @@ coral_data <- cots_data %>% #pull in data, this dataframe is for the animated ba
                    "3. Percent live and dead coral cover seen in each reef by year <br>",
                    "<br>", #br= line break to edit spacing
                    "All data analysed was collected from the Australian Institute of Marine Science's Long-Term Monitoring Project. <br>", #data source acknowledgement 
-                   "<p>Data Soruce: ",
+                   "<p>Data Source: ",
                    "<em> Australian Institute of Marine Science (AIMS). (2015). AIMS Long-term Monitoring Program: Crown-of-thorns starfish and benthos Manta Tow Data (Great Barrier Reef). https://doi.org/10.25845/5c09b0abf315a.", #data source citation
                    sep= ""))
       })
