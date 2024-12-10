@@ -1,21 +1,18 @@
-Name,Plot Name,Description,Type
+Name,Plot_Name,Description,Type
 SECTOR,Site,Name of survey sites,Character
-SHELF,N/A,Location on Great Barrier Reef ,Character
+SHELF,N/A,"Location on Great Barrier Reef (I= inshore, M= mid shelf, and O= outer-shelf)",Character
 REEF_NAME,Reef,The name of the specific reef within a survey site,Character
 REEF_ID,N/A,Unique number code for each reef,Numeric
 LATITUDE,N/A,Latitude of each reef within a specific site,Numeric
 LONGITUDE,N/A,Longitude of each reef within a specific site,Numeric
-P_CODE,N/A,Denotes which program collected the data,Numeric
+P_CODE,N/A,"Denotes which program collected the data (RM= LTMP Program, RAP= RAP Program, RMRAP= Both LTMP and RAP Programs)",Numeric
 VISIT_NO,N/A,The number of years the reef has been visited,Numeric
 YEAR_CODE,N/A,Indicates years that the survey was conducted,Numeric
 REPORT_YEAR,N/A,Indicates when the report for that site was issued,Numeric
-SAMPLE_DATE,,Indicate the date the survey occurred ,Date
-MEDIAN_LIVE_CORAL,N/A,,Character
-MEDIAN_SOFT_CORAL,N/A,,Character
-MEDIAN_DEAD_CORAL,N/A,,Character
-MEAN_LIVE_CORAL,,,Numeric
-MEAN_SOFT_CORAL,,,Numeric
-MEAN_DEAD_CORAL,,,Numeric
+SAMPLE_DATE,N/A,Indicates the date the survey,Date
+MEAN_LIVE_CORAL,N/A,Average percent cover estimate for live hard coral calculated from each tow within the survey,Numeric
+MEAN_SOFT_CORAL,N/A,Average percent cover estimate for soft hard coral calculated from each tow within the survey,Numeric
+MEAN_DEAD_CORAL,Dead Coral,Average percent cover estimate for dead coral calculated from each tow within the survey,Numeric
 TOTAL_COTS,N/A,Total number of crown of thorn starfish seen on the survey,Numeric
 MEAN_COTS_PER_TOW,N/A,Average number of crown of thorn starfish seen on each tow within the survey,Numeric
 TOTAL_TROUT,N/A,Total number of coral trout seen on the survey,Numeric
