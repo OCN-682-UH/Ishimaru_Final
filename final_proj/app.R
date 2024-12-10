@@ -4,16 +4,17 @@ library(shiny) #to create the shiny app
 library(bslib) #to create the pages in shiny 
 library(tidyverse) #for general data manipulation 
 library(stringr) #to fix capitalization 
-library(here) #for unbreakable file paths
 library(leaflet) #to create interactive map
 library(gganimate) #to create animated plots
 library(rcartocolor) #for a fun + colorblind friendly palette 
 library(lubridate) #for working with dates
 library(kableExtra) #for creating nice tables
+library(png) #for getting animated plots to display in published shiny app
+library(gifski) #for getting animated plots to display in published shiny app
 
 # Read-in Data
-raw_data <- read.csv(here("final_proj", "data", "manta-tow-by-reef.csv")) #read in data from AIMS
-data_dict <- read.csv(here("final_proj", "data", "data_dict.csv")) #read in data dictionary 
+raw_data <- read.csv("manta-tow-by-reef.csv") #read in data from AIMS
+data_dict <- read.csv( "data_dict.csv") #read in data dictionary 
 
 # Data Manipulation
 cots_data <- raw_data %>% #pull in raw data
@@ -77,11 +78,13 @@ coral_data <- cots_data %>%
      )),
    
    nav_panel(title= "Objective 2", p( #fourth page, add title on navigation bar
-     imageOutput("bar"), #add animated bar plot
      uiOutput("o2_body"), #add small description
+     imageOutput("bar"), #add animated bar plot
      )),
    
    nav_panel(title= "Objective 3", p( #fifth page, add title on navigation bar
+     uiOutput("o3_body"), #add small description
+     
      selectInput(inputId= "site", #site name for the input
                  label= "Select a Site", #label for the input
                  choices= unique(cots_data$Site)), #drop down with site choices
@@ -94,9 +97,6 @@ coral_data <- cots_data %>%
        column(6, htmlOutput("reef_table")), #add  a kable table
        column(6, imageOutput("line")) #add a animated line plot 
      ),
-     
-     uiOutput("o3_body") #add small description
-     
    ))
    
 )
@@ -113,7 +113,7 @@ coral_data <- cots_data %>%
       })
       
       output$gbr_pic <- renderImage({ #add great barrier reef image
-        list(src= here("final_proj", "gbr.png"), #find the file
+        list(src= "gbr.png", #find the file
              width= "100%", #width of displayed image
              height= 400) #height of displayed image
       },
@@ -180,6 +180,15 @@ coral_data <- cots_data %>%
                    sep= ""))
       })
       
+      output$o2_body <- renderUI({ #add info on what I accomplished in objective 2
+        HTML(paste("An animated plot that shows mean percent cover of live coral from each site from 1992 - 2022. ", #regular text
+                   "The raw data from AIMS included mean live hard coral and mean live soft coral for every reef within each site and year. ",
+                   "To calculate mean percent cover of live coral I first summed the mean live coral and mean live soft coral by reef and year, then I found the mean of each site by year. ",
+                   "When bars are not visible in the animation that means that surveys were not conducted on any reef within that site for that specific year. ",
+                   "Although this shows broad site changes over time, it's extremely general. Averaging over multiple reefs within one site can hide significant changes that occur within one reef site.",
+                   sep= ""))
+      })
+      
       output$bar <- renderImage({ #add animated bar plot
         coral_map <- ggplot(data= coral_data, aes(x= Site, y= live_coral_tot, fill= Site)) + #initialize plot
           geom_bar(stat= "identity") + #display bars based on our dataframe needs
@@ -206,13 +215,10 @@ coral_data <- cots_data %>%
       deleteFile= T #delete this every run
       )
       
-      output$o2_body <- renderUI({ #add info on what I accomplished in objective 2
-        HTML(paste("<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>","<br>", #had issue with spacing (the text was showing up mid animation?) so this was a quick/simple way to alter spacing
-                   "<p> Figure 1. An animated plot that shows live coral percent cover from each site from 1992 - 2022. ", #regular text
-                   "The raw data from AIMS included mean live coral and mean live soft coral for every reef within each site and year. ",
-                   "To calculate mean percent live coral I first summed the mean live coral and mean live soft coral by reef and year, then I found the mean of each site by year. ",
-                   "When bars are not visible in the animation that means that surveys were not conducted on any reef within that site for that specific year. ",
-                   "Although this shows broad site changes over time, it's extremely general. Averaging over multiple reefs within one site can hide significant changes that occur within one reef site.",
+      output$o3_body <- renderUI({ #add info on what I accomplished in objective 3
+        HTML(paste("<p> On your left is a table with the mean live and dead percent coral cover by year for a specific reef within a site. ", #regular text
+                   "The animated line plot on your right visualizes the table and shows how mean percent cover of coral changed overtime. ",
+                   "By looking at a specific reef we can obtain more information about reef health when compared to broadly analyzing by site.",
                    sep= ""))
       })
       
@@ -261,13 +267,6 @@ coral_data <- cots_data %>%
         list(src = "coral_status.gif", contentType = "image/gif") #help us get animation displayed in shiny
       },
       deleteFile= T) #delete this every run
-      
-      output$o3_body <- renderUI({ #add info on what I accomplished in objective 3
-        HTML(paste("<p> On your left is a table with the percent mean live and dead coral cover by year for a specific reef within a site. ", #regular text
-                   "The animated line plot on your right visualizes the table and shows how percent mean coral cover changed overtime. ",
-                   "By looking at a specific reef we can obtain more information about reef health when compared to broadly analyzing by site.",
-                   sep= ""))
-      })
       
 }
 
