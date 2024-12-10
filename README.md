@@ -7,7 +7,7 @@
 ### Repository Set Up
 Within this repository I have a folder named **final_proj** that holds...
 - **app.r:** A script that holds the code to my shiny app
-- **data_dict:** A data dictionary that corresponds to my raw data
+- **data_dict.csv:** A data dictionary that corresponds to my raw data
 - **gbr.png:** An image of the Great Barrier Reef that I use in my shiny app and also included below!
 - **manta-tow-by-reef.csv:** My raw data from AIMS
 - **rsconnect:** A folder that was created once I published my shiny app
