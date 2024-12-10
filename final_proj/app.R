@@ -22,7 +22,8 @@ cots_data <- raw_data %>% #pull in raw data
   mutate(MEAN_SOFT_CORAL= ifelse(is.na(MEAN_SOFT_CORAL), 0, MEAN_SOFT_CORAL)) %>% #make soft coral with values of NA 0 (for calculating total live coral)
   mutate(live_coral_tot= MEAN_LIVE_CORAL + MEAN_SOFT_CORAL) %>% #calculate total live coral
   rename(Site= SECTOR, Reef= REEF_NAME) %>% #alter names (make them look nice)
-  mutate(Reef= str_to_title(Reef)) %>% #fix values within reef column (reef names) so only the first letter is capitalized
+  mutate(Reef= str_to_title(Reef)) %>% #fix values within reef column (reef names) so only the first letter is capitalized 
+  mutate(Site= factor(Site, levels= c("CG", "PC", "CL", "CA", "IN", "TO", "CU", "WH", "PO", "SW", "CB"), ordered= T)) %>% #factor sites by lattitude for plotting
   mutate(Site= recode(Site, #fix site names so the whole name is displayed instead of the abbreviation 
                       "CA"= "Cairns",
                       "CB"= "Capricorn-Bunker",
@@ -35,7 +36,9 @@ cots_data <- raw_data %>% #pull in raw data
                       "SW"= "Swain",
                       "TO"= "Townsville",
                       "TS"= "Torres Strait",
-                      "WH"= "Whitsunday"))
+                      "WH"= "Whitsunday")) %>%
+  group_by(Site, Reef) %>% #group by site and reef 
+  filter(n() != 1) #filter out reefs that only have one year of data collected (because it does not help us answer questions of long term dynamics)
   
 pal <- carto_pal(11, "Safe") #create color palette for leaflet map and animated bar plot
 
@@ -43,10 +46,10 @@ sites <- cots_data %>% #pull in data, sites makes a dataframe with one instance 
   group_by(Site, Reef) %>% #group data by site
   filter(row_number()==1) #one row per site (for labeling leaflet map)
 
-coral_data <- cots_data %>%
-  select(Site, Year, live_coral_tot) %>%
-  group_by(Site, Year) %>%
-  summarise(live_coral_tot= mean(live_coral_tot))
+coral_data <- cots_data %>% #pull in data, this dataframe is for the animated bar graph
+  select(Site, Year, live_coral_tot) %>% #select columns we want to use
+  group_by(Site, Year) %>% #group data by site and year column
+  summarise(live_coral_tot= mean(live_coral_tot)) #calculate mean percent cover of live coral for each site
 
 # Build Shiny App!
  ui <- page_navbar( #create navigation bar (thats different pages)
@@ -154,7 +157,7 @@ coral_data <- cots_data %>%
         })
       
       output$site_map <- renderUI({ #add second page title in bold
-        HTML(paste("<strong> Site Map",
+        HTML(paste("<strong> Site Map", 
                    sep= ""))
       })
       
@@ -162,7 +165,7 @@ coral_data <- cots_data %>%
       output$map <- renderLeaflet({ #add leaflet map
         leaflet() %>% #call leaflet
         addTiles() %>% #add map tiles
-        setView(lat= -17, lng= 150, zoom= 4) %>% #set our initial view
+        setView(lat= -17, lng= 150, zoom= 5) %>% #set our initial view
         addCircleMarkers(data= sites, #add sites dataframe to create points of each site
                          lat= ~LATITUDE, #lat of each site
                          lng= ~LONGITUDE, #long of each site
@@ -238,6 +241,7 @@ coral_data <- cots_data %>%
           filter(Site== input$site, Reef== input$reef) #filter our dataframe so it only includes the site and reef the user selected
       })
       
+      
       output$reef_table <- renderText({ #create nice table
         kbl(reef_data()) %>% #create kable
           kable_classic_2(lightable_options = "striped") %>% #select type
@@ -245,28 +249,29 @@ coral_data <- cots_data %>%
       })
       
       output$line <- renderImage({ #create animated line plot
-        coral_status <- reef_data() %>% #pull in our reef data that was edited based on user input
-          ggplot(aes(x= Year, y= Cover, color= Status)) + #initialize plot
-          geom_line() + #make it a line plot
-          geom_point() + #add points for animation
-          transition_reveal(Year) + #animate by year (transition reveal shows the new year while keeping old yeaers displayed)
-          labs(title= "Percent Live vs. Dead Coral Cover", #add plot title
-               x= "Year", #add x-axis title
-               y= "Mean Coral Cover (%)", #add y-axis title
-               color= "Status", #add legend title
-               caption= "Source: Australian Institute of Marine Science (AIMS). 2015.") + #add caption to credit data source
-          theme_bw() + #nice simple theme
-          theme(plot.title= element_text(hjust= 0.5, face= "bold", size= 25), #change text size and bold title
-                axis.text= element_text(size= 13), #change axis values size
-                axis.title= element_text(size= 16), #change axis title size
-                plot.caption= element_text(size= 10), #change caption text size and bold title
-                plot.caption.position = "plot", #make the caption in the bottom right corner
-                legend.title= element_text(size= 16), #change legend title size
-                legend.text= element_text(size= 13)) #change legend text size
+          coral_status <- reef_data() %>% #pull in our reef data that was edited based on user input
+            ggplot(aes(x= Year, y= Cover, color= Status)) + #initialize plot
+            geom_line() + #make it a line plot
+            geom_point() + #add points for animation
+            scale_x_continuous(breaks = ~ axisTicks(., log = FALSE)) + #scale x axis so date show up nicely
+            transition_reveal(Year) + #animate by year (transition reveal shows the new year while keeping old years displayed)
+            labs(title= "Percent Live vs. Dead Coral Cover", #add plot title
+                 x= "Year", #add x-axis title
+                 y= "Mean Coral Cover (%)", #add y-axis title
+                 color= "Status", #add legend title
+                 caption= "Source: Australian Institute of Marine Science (AIMS). 2015.") + #add caption to credit data source
+            theme_bw() + #nice simple theme
+            theme(plot.title= element_text(hjust= 0.5, face= "bold", size= 25), #change text size and bold title
+                  axis.text= element_text(size= 13), #change axis values size
+                  axis.title= element_text(size= 16), #change axis title size
+                  plot.caption= element_text(size= 10), #change caption text size and bold title
+                  plot.caption.position = "plot", #make the caption in the bottom right corner
+                  legend.title= element_text(size= 16), #change legend title size
+                  legend.text= element_text(size= 13)) #change legend text size
+        
         anim_save("coral_status.gif", animate(coral_status, nframes= 500)) #slow animation speed
         list(src = "coral_status.gif", contentType = "image/gif") #help us get animation displayed in shiny
-      },
-      deleteFile= T) #delete this every run
+      }, deleteFile= T) #delete this every run
       
 }
 
