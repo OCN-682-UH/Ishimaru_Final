@@ -1,6 +1,7 @@
 #MBIO 612: Final Project Test
 
 library(shiny) #to create the shiny app
+library(rsconnect) #to publish the shiny app
 library(bslib) #to create the pages in shiny 
 library(tidyverse) #for general data manipulation 
 library(stringr) #to fix capitalization 
